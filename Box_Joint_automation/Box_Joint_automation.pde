@@ -1,3 +1,8 @@
+/*
+this is the beginning framework for lcd menus
+and hardware debounced buttons
+*/
+
 #include <SerialLCD.h>
 #include <NewSoftSerial.h> //this is a must
 
