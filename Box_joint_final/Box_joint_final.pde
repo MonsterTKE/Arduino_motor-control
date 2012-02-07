@@ -120,4 +120,4 @@ boolean lcdRefreshOK() {
   } 
   return OK;
 }
-
+//adding some comments here so I can test out merging.
