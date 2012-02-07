@@ -14,8 +14,14 @@ const int inPin2 = 5; //**
 const int inPin3 = 6;//**
 const int inPin4 = 7; //End button pins
 
+boolean menuButtonPressed = false;  //button states
+boolean menuBefore = false;         //**
+boolean leftButtonPressed = false;  //**
+boolean leftBefore = false;         //**
+boolean RightButtonPressed = false; //**
+boolean rightBefore = false;        //end button states.
 
-int counter = 0; //Loop counter to refresh screen.
+int loopCounter = 0; //Loop counter to refresh screen.
 
 int menuMode = 1; //Initialize the controller in setup mode.
 
