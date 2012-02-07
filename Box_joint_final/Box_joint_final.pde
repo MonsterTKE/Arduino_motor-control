@@ -1,6 +1,6 @@
 /*
-this is the beginning framework for lcd menus
- and hardware debounced buttons
+this is the advancing framework for lcd menus
+ and hardware debounced buttons, Now includes Switch case tomfoolery.
  */
 
 #include <SerialLCD.h>
@@ -120,4 +120,3 @@ boolean lcdRefreshOK() {
   } 
   return OK;
 }
-//adding some comments here so I can test out merging.
