@@ -14,7 +14,7 @@ const int inPin2 = 5; //**
 const int inPin3 = 6;//**
 const int inPin4 = 7; //End button pins
 
-int counter = 0;
+int counter = 0; //Loop counter to refresh screen.
 
 void setup() {
   pinMode(inPin1, INPUT); 
@@ -28,7 +28,7 @@ void setup() {
 
 void loop() {
   int pinRead1 = digitalRead(inPin1);
-  int pinRead2 = digitalRead(inPin2);
+  int menuButton = digitalRead(inPin2);
   int pinRead3 = digitalRead(inPin3);
   int pinRead4 = digitalRead(inPin4);
 
@@ -41,11 +41,11 @@ void loop() {
       slcd.setCursor(12, 1);
       slcd.print(counter, DEC);
     }
-    else if (pinRead2 == HIGH) {
+    else if (menuButton == HIGH) {
       slcd.setCursor(0, 0);
       slcd.print("Pin two state: ");
       slcd.setCursor(0, 1);
-      slcd.print(pinRead2, DEC);
+      slcd.print(menuButton, DEC);
       slcd.setCursor(12, 1);
       slcd.print(counter, DEC);
     }
@@ -71,7 +71,7 @@ void loop() {
       slcd.setCursor(0, 1);
       slcd.print(pinRead1, DEC);
       slcd.setCursor(3, 1);
-      slcd.print(pinRead2, DEC);
+      slcd.print(menuButton, DEC);
       slcd.setCursor(6, 1);
       slcd.print(pinRead3, DEC);
       slcd.setCursor(9, 1);
