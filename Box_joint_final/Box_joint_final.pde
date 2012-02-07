@@ -22,8 +22,10 @@ boolean RightButtonPressed = false; //**
 boolean rightBefore = false;        //end button states.
 
 int loopCounter = 0; //Loop counter to refresh screen.
+unsigned long lcdUpdate;
+unsigned long lastLcdUpdate;
 
-int menuMode = 1; //Initialize the controller in setup mode.
+int menuMode = 0; //Initialize the controller in setup mode.
 
 void setup() {
   pinMode(inPin1, INPUT); 
@@ -47,7 +49,7 @@ void loop() {
   }
   if (menuMode == 3) {
     menuMode = 0; 
-  }
+  } 
 
   switch (menuMode) {
   case 1:
@@ -60,7 +62,7 @@ void loop() {
     setupDefault();
     break;
   }
-
+  loopCounter++;
 }
 
 void setupDefault() {
@@ -69,6 +71,9 @@ void setupDefault() {
   int inputLeft = digitalRead(inPin3);
   int inputRight = digitalRead(inPin4);
 
+  if (lcdRefreshOK()) {
+    slcd.clear();
+  }
   slcd.setCursor(0, 0);
   slcd.print("Setup Mode");
   slcd.setCursor(0, 1);
@@ -87,6 +92,9 @@ void jogMenuMode() {
   int inputLeft = digitalRead(inPin3);
   int inputRight = digitalRead(inPin4);
 
+  if (lcdRefreshOK()) {
+    slcd.clear();
+  }
   slcd.setCursor(0, 0);
   slcd.print("Jog Mode");
   slcd.setCursor(12, 1);
@@ -94,9 +102,22 @@ void jogMenuMode() {
 }
 
 void slewMenuMode() {
+  if (lcdRefreshOK()) {
+    slcd.clear();
+  }
   slcd.setCursor(0, 0);
   slcd.print("Slew Mode");
   slcd.setCursor(12, 1);
   slcd.print(menuMode, DEC); 
+}
+
+boolean lcdRefreshOK() {
+  boolean OK = false;
+  lcdUpdate = millis();
+  if (lcdUpdate > lastLcdUpdate) {
+    lastLcdUpdate = lcdUpdate + 1000;
+    OK = true;
+  } 
+  return OK;
 }
 
