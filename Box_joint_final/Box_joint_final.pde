@@ -45,7 +45,8 @@ void loop() {
 
   if (menuButton == HIGH){
     menuMode++;
-    delay(50); 
+    delay(100);
+	slcd.clear();	
   }
   if (menuMode == 3) {
     menuMode = 0; 
@@ -111,7 +112,7 @@ void slewMenuMode() {
   slcd.print(menuMode, DEC); 
 }
 
-boolean lcdRefreshOK() {
+boolean lcdRefreshOK() { //Refresh the lcd screen, Still need to find a better way to do this.
   boolean OK = false;
   lcdUpdate = millis();
   if (lcdUpdate > lastLcdUpdate) {
