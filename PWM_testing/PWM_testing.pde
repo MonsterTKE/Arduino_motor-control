@@ -28,13 +28,11 @@ void loop() {
   rightRead = digitalRead(rightButton);
   if (leftRead == HIGH) {
     digitalWrite(CWpin, HIGH);
-    counter++;
     Serial.print("Left Button: ");
       Serial.println(pwmRate);
   }
   else if (rightRead == HIGH) {
     digitalWrite(CCWpin, HIGH);
-    counter++;
     Serial.print("Right Button: ");
       Serial.println(pwmRate);
   }
@@ -45,11 +43,8 @@ void loop() {
   analogWrite(PwmPin, pwmRate);
   Serial.print("Counter: ");
     Serial.println(counter);
-  if (counter == 10) {
-    pwmRate = pwmRate - 2;
-    counter = 0; 
   }
-} 
+
 
 
 
