@@ -48,7 +48,6 @@ void setup() { //int yer inpins
 }
 
 void loop() { //high speed code goes here
-if 
 mainMenu();
 }
 
