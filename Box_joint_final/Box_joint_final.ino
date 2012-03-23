@@ -16,6 +16,10 @@ const int inPin4 = 6; //yellow enter button, I/O 2
 const int inPin5 = 8; //left limit switch. I/O 6.
 const int inPin6 = 9; //right limit switch, I/O 3.
 
+//const int Hallpin = 2;               // wired to Hall Effect sensor output
+//const int CWpin  = 10;                // wired to MD01B pin INa
+//const int CCWpin = 3;                // wired to MD01B pin INb
+
 boolean menuButtonPressed = false;  //button states
 boolean menuBefore = false;         //**
 boolean leftButtonPressed = false;  //**
@@ -26,11 +30,13 @@ boolean rightBefore = false;        //end button states.
 int loopCounter = 0; //Loop counter to refresh screen.
 unsigned long lcdUpdate;
 unsigned long lastLcdUpdate;
+int refreshScreen = 0; //boolean counter to clear screen.
 
 int menuMode = 0; //Initialize the controller in setup mode.
 
 //measurement variables.
 unsigned int targetSteps = 32; //inital target for slew mode and setup mode.
+unsigned int testVar = 0; //counter for jogmode
 
 int stepIncrements = 0;
 int stepMultiplier = 1;
@@ -82,8 +88,8 @@ void mainMenu() { //this is the overall menu controller
 }
 
 void setupDefault() { //this is the default setup menu
-	int inputLeft = digitalRead(inPin2);
 	int inputRight = digitalRead(inPin1);
+	int inputLeft = digitalRead(inPin2);
 	int menuButton = digitalRead(inPin3);
 	int enterButton = digitalRead(inPin4);
 	double targetInches = targetSteps * .00390625;
@@ -109,15 +115,17 @@ void setupDefault() { //this is the default setup menu
 	
   if (inputRight == HIGH) {
   targetSteps = targetSteps + stepMultiplier;
-  noClearBottom();
+  refreshScreen =1;
   }
   else if (inputLeft == HIGH) {
   targetSteps = targetSteps - stepMultiplier;
-  noClearBottom();
+  refreshScreen = 1;
   }
-//  if (lcdRefreshOK()) {
-//   noClear;
-//  }
+
+  	if (refreshScreen == 1 && !inputLeft && !inputRight) {
+	noClearBottom();
+	refreshScreen = 0;
+	}
   slcd.setCursor(0, 0);
   slcd.print(" steps ");
   slcd.setCursor(7,0);
@@ -130,16 +138,40 @@ void setupDefault() { //this is the default setup menu
 }
 
 void jogMenuMode() { //This is the controller for jog mode
-  int inputLeft = digitalRead(inPin3);
-  int inputRight = digitalRead(inPin4);
-
-  if (lcdRefreshOK()) {
-    noClear;
-  }
   slcd.setCursor(0, 0);
-  slcd.print("Jog Mode        ");
+  slcd.print("Jog mode | steps");
+  jogMenuControl();
+}
+
+void jogMenuControl() { //This is the action code for jog mode
+	int inputRight = digitalRead(inPin1);
+	int inputLeft = digitalRead(inPin2);
+	
+	
+	if (inputLeft == HIGH) {
+	testVar++;
+	slcd.setCursor(8, 1);
+	slcd.print("<--");
+	refreshScreen = 1;
+	}
+	else if (inputRight == HIGH) {
+	testVar++;
+	slcd.setCursor(8, 1);
+	slcd.print("-->");
+	refreshScreen = 1;
+	}
+	else {
+	testVar = 0;
+	}
+	if (refreshScreen == 1 && !inputLeft && !inputRight) {
+	noClearBottom();
+	refreshScreen = 0;
+	}
+
   slcd.setCursor(12, 1);
-  slcd.print(menuMode, DEC);
+  slcd.print(testVar, DEC);
+  slcd.setCursor(0, 1);
+  slcd.print(refreshScreen, DEC);
 }
 
 void slewMenuMode() { //this is the slewing controller
@@ -152,6 +184,10 @@ void slewMenuMode() { //this is the slewing controller
   slcd.print(menuMode, DEC); 
   slcd.setCursor(1, 1);
   slcd.print(targetSteps, DEC);
+}
+
+void slewMenuControl() { //this is the sction code for slew mode.
+
 }
 
 boolean lcdRefreshOK() { //Refresh the lcd screen, this is a better way, calls noClear()

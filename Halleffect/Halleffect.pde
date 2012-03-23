@@ -1,5 +1,5 @@
 int hall = 2;
-int led = 10;
+int led = 13;
 int ledStatus = 0;
 const int hallPin = 2;
 volatile int ledCount = 1;
@@ -16,10 +16,11 @@ void setup() {
 
 void loop() {
 
-  if (ledCount % 2 == 0) {
+  if (ledCount > 0) {
     Serial.print("hall value: ");
     Serial.println(ledCount);
     digitalWrite(led, HIGH);
+	delay(10000);
   }
   else {
     digitalWrite(led, LOW);
