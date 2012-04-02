@@ -7,8 +7,8 @@ int rightButton = 11;
 int leftRead = 0;
 int rightRead = 0;
 
-int CWpin = 7;
-int CCWpin = 8;
+int CWpin = 8;
+int CCWpin = 9;
 int PwmPin = 5;
 
 int Var = 1;
