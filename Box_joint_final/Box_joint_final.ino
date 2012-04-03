@@ -21,7 +21,7 @@ const int inPin6 = 6; //right limit switch. Blue/White twisted pair.
 
 //const int Hallpin = 2;               // wired to Hall Effect sensor output
 //const int CWpin  = 10;                // wired to MD01B pin INa
-//const int CCWpin = 3;                // wired to MD01B pin INb
+//const int CCWpin = 9;                // wired to MD01B pin INb
 
 
 int loopCounter = 0; //Loop counter to refresh screen.
@@ -39,19 +39,21 @@ int stepIncrements = 0;
 int stepMultiplier = 1;
 
 void setup() { //int yer inpins
+
   pinMode(inPin1, INPUT); 
   pinMode(inPin2, INPUT);
   pinMode(inPin3, INPUT);
   pinMode(inPin4, INPUT);
   pinMode(inPin5, INPUT);
   pinMode(inPin6, INPUT);
+  
   Serial.begin(9600);
   slcd.begin();
   slcd.backlight();
 }
 
 void loop() { //high speed code goes here
-  mainMenu();
+    mainMenu();
 }
 
 void mainMenu() { //this is the overall menu controller
@@ -241,3 +243,10 @@ void lcdPrintDouble( double val, byte precision, int row, int col){ // example: 
   }
 }
 
+void rightLimitHandler() {
+  // placeholder
+}
+
+void leftlimit() {
+  //placeholder
+}
