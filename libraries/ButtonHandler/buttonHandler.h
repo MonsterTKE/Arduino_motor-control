@@ -10,11 +10,12 @@ on a buttonpress.
 class buttonHandler
 {
  public:
- 	buttonHandler(int buttonRead);
+ 	Button(boolean buttonRead)
+ 	boolean buttonHandler();
  private:
  	boolean buttonState;
  	boolean oldButton;
-}
+};
 
 
 #endif

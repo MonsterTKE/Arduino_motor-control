@@ -15,6 +15,8 @@ const int yellowEnter = 8; //yellow enter button, I/O 2
 const int leftLimit = 7; //left limit switch. Green/White twisted pair.
 const int rightLimit = 6; //right limit switch. Blue/White twisted pair.
 
+int var = 0;
+
 boolean oldButtonState = false;
 
 void setup() { //int yer inpins
