@@ -17,31 +17,6 @@ const int rightLimit = 6; //right limit switch. Blue/White twisted pair.
 
 boolean oldButtonState = false;
 
-  boolean inputLeft = digitalRead(leftRed);
-  boolean inputRight = digitalRead(rightRed);
-  boolean menuButton = digitalRead(greenMenu);
-  boolean enterButton = digitalRead(yellowEnter);
-
-
-//const int Hallpin = 2;               // wired to Hall Effect sensor output
-//const int CWpin  = 10;                // wired to MD01B pin INa
-//const int CCWpin = 9;                // wired to MD01B pin INb
-
-
-int loopCounter = 0; //Loop counter to refresh screen.
-unsigned long lcdUpdate;
-unsigned long lastLcdUpdate;
-int refreshScreen = 0; //boolean counter to clear screen.
-
-int menuMode = 0; //Initialize the controller in setup mode.
-int var = 0;
-//measurement variables.
-unsigned int targetSteps = 32; //inital target for slew mode and setup mode.
-unsigned int testVar = 0; //counter for jogmode
-
-int stepIncrements = 0;
-int stepMultiplier = 1;
-
 void setup() { //int yer inpins
 
   pinMode(rightRed, INPUT); 
@@ -59,7 +34,25 @@ void setup() { //int yer inpins
 void loop() {
 if (buttonHandler(greenMenu)) {
   slcd.setCursor(0,0);
-  slcd.print("ok");
+  slcd.print("green");
+  slcd.setCursor(2,0);
+  slcd.print(var, DEC);
+}
+else if (buttonHandler(yellowEnter)) {
+  slcd.setCursor(0,0);
+  slcd.print("yellow");
+  slcd.setCursor(2,0);
+  slcd.print(var, DEC);
+}
+else if (buttonHandler(leftRed)) {
+  slcd.setCursor(0,0);
+  slcd.print("Left Red");
+  slcd.setCursor(2,0);
+  slcd.print(var, DEC);
+}
+else if (buttonHandler(rightRed)) {
+  slcd.setCursor(0,0);
+  slcd.print("Right Red");
   slcd.setCursor(2,0);
   slcd.print(var, DEC);
 }
