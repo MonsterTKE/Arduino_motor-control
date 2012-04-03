@@ -67,7 +67,10 @@ if (buttonHandler(greenMenu)) {
   slcd.print(oldButtonState, DEC);
 }
 
-//***************************************************//
+/* This part seems to lose a button press if done quickly
+Im not sure if it due to the code or due to the hysteresis 
+in the schmitt trigger
+*/
 
 boolean buttonHandler(int buttonRead){
 
