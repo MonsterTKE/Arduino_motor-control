@@ -5,6 +5,7 @@ But at least I have a class I can use elsewhere!
 
 #include <SerialLCD.h>
 #include <SoftwareSerial.h> //this is a must
+#include <Tap.h>
 
 SerialLCD slcd(11,12); //Initialize the lcd lib.
 
@@ -17,7 +18,10 @@ const int rightLimit = 6; //right limit switch. Blue/White twisted pair.
 
 int var = 0;
 
-boolean oldButtonState = false;
+Tap green(greenMenu);
+Tap right_Rb(rightRed);
+Tap left_Rb(leftRed);
+Tap yellow(yellowEnter);
 
 void setup() { //int yer inpins
 
@@ -31,35 +35,38 @@ void setup() { //int yer inpins
   Serial.begin(9600);
   slcd.begin();
   slcd.backlight();
+
 }
 
 void loop() {
-if (buttonHandler(greenMenu)) {
+if (green.isHit()) {
+  var++;
   slcd.setCursor(0,0);
   slcd.print("green");
-  slcd.setCursor(2,0);
+  slcd.setCursor(0,1);
   slcd.print(var, DEC);
 }
-else if (buttonHandler(yellowEnter)) {
+if (right_Rb.isHit()) {
+  var++;
+  slcd.setCursor(0,0);
+  slcd.print("right red");
+  slcd.setCursor(0,1);
+  slcd.print(var, DEC);
+}
+if (left_Rb.isHit()) {
+  var++;
+  slcd.setCursor(0,0);
+  slcd.print("left red");
+  slcd.setCursor(0,1);
+  slcd.print(var, DEC);
+}
+if (yellow.isHit()) {
+  var++;
   slcd.setCursor(0,0);
   slcd.print("yellow");
-  slcd.setCursor(2,0);
+  slcd.setCursor(0,1);
   slcd.print(var, DEC);
 }
-else if (buttonHandler(leftRed)) {
-  slcd.setCursor(0,0);
-  slcd.print("Left Red");
-  slcd.setCursor(2,0);
-  slcd.print(var, DEC);
-}
-else if (buttonHandler(rightRed)) {
-  slcd.setCursor(0,0);
-  slcd.print("Right Red");
-  slcd.setCursor(2,0);
-  slcd.print(var, DEC);
-}
-    slcd.setCursor(0,1);
-  slcd.print(oldButtonState, DEC);
 }
 
 /* This part seems to lose a button press if done quickly
@@ -69,6 +76,8 @@ in the schmitt trigger
 
 boolean buttonHandler(int buttonRead){
 
+static boolean oldButtonState = false;
+
 boolean buttonState = digitalRead(buttonRead);
 boolean oldButton = oldButtonState;
 
@@ -76,7 +85,9 @@ if (buttonState && !oldButtonState) {
   var++;
   oldButtonState = buttonState;
 }
-else if (!buttonState) {
+else {
   oldButtonState = false;
 }
 }
+
+
