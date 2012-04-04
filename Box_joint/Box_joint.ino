@@ -1,9 +1,5 @@
 /*
-this is the advancing framework for lcd menus
- and hardware debounced buttons, Now includes Switch case tomfoolery/and other stuff
- totally rebuilt circuitry to use SMD parts and anrduino nano mounted on same board.
- This removes alot of the wire clutter inside the box and makes it simpler to visualize 
- what is connected to what and what it is doing.
+Removing comments.
  */
 
 #include <SerialLCD.h>
