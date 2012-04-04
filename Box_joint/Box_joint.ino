@@ -140,34 +140,6 @@ void jogMenuMode() { //This is the controller for jog mode
   jogMenuControl();
 }
 
-void jogMenuControl() { //This is the action code for jog mode
-
-  if (left_Rb.isHit()) {
-    testVar++;
-    slcd.setCursor(8, 1);
-    slcd.print("<--");
-    refreshScreen = 1;
-  }
-  else if (right_Rb.isHit()) {
-    testVar++;
-    slcd.setCursor(8, 1);
-    slcd.print("-->");
-    refreshScreen = 1;
-  }
-  else {
-    testVar = 0;
-  }
-  //if (refreshScreen == 1 && !left_Rb.isHit() && !right_Rb.isHit()) {
-  //  noClearBottom();
-  //  refreshScreen = 0;
-  //}
-
-  slcd.setCursor(12, 1);
-  slcd.print(testVar, DEC);
-  slcd.setCursor(0, 1);
-  slcd.print(refreshScreen, DEC);
-}
-
 void slewMenuMode() { //this is the slewing controller
   if (lcdRefreshOK()) {
     noClear;
@@ -180,9 +152,7 @@ void slewMenuMode() { //this is the slewing controller
   slcd.print(targetSteps, DEC);
 }
 
-void slewMenuControl() { //this is the sction code for slew mode.
-
-}
+//*************************************** LCD HANDLERS **********************************
 
 boolean lcdRefreshOK() { //Refresh the lcd screen, this is a better way, calls noClear()
   boolean OK = false;
@@ -239,10 +209,55 @@ void lcdPrintDouble( double val, byte precision, int row, int col){ // example: 
   }
 }
 
-void rightLimitHandler() {
+
+//***************** MOTOR HANDLING *************************
+
+void rightLimitHandler() { //this controld the behavior of the system when the RIGHT limit switch is HIGH.
   // placeholder
 }
 
-void leftlimit() {
+void leftlimit() { //this controld the behavior of the system when the LEFT limit switch is HIGH.
   //placeholder
+}
+
+/*
+void stopMotor(){ //This is to stop the motor
+  digitalWrite(CWpin, LOW); 
+  digitalWrite(CCWpin, LOW);
+}
+*/
+
+void slewMenuControl() { //this is the action code for slew mode.
+
+}
+
+void jogMenuControl() { //This is the action code for jog mode
+
+  boolean rightRed_b = digitalRead(rightRed);
+  boolean leftRed_b = digitalRead(leftRed);
+
+  if (left_Rb.isHit()) {
+    testVar++;
+    slcd.setCursor(8, 1);
+    slcd.print("<--");
+    refreshScreen = 1;
+  }
+  else if (right_Rb.isHit()) {
+    testVar++;
+    slcd.setCursor(8, 1);
+    slcd.print("-->");
+    refreshScreen = 1;
+  }
+  else {
+    testVar = 0;
+  }
+  if (refreshScreen == 1 && !rightRed_b && !leftRed_b) {
+    noClearBottom();
+    refreshScreen = 0;
+  }
+
+  slcd.setCursor(12, 1);
+  slcd.print(testVar, DEC);
+  slcd.setCursor(0, 1);
+  slcd.print(refreshScreen, DEC);
 }
