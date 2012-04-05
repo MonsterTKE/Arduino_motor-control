@@ -1,12 +1,18 @@
 /*
-Removing comments.
+this is the advancing framework for lcd menus
+ and hardware debounced buttons, Now includes Switch case tomfoolery/and other stuff
+ totally rebuilt circuitry to use SMD parts and anrduino nano mounted on same board.
+ This removes alot of the wire clutter inside the box and makes it simpler to visualize 
+ what is connected to what and what it is doing.
  */
-
+//*********************LIBRARY IMPORTS*********************************
 #include <SerialLCD.h>
 #include <SoftwareSerial.h> //this is a must
 #include <Tap.h>
 
 SerialLCD slcd(11,12); //Initialize the lcd lib.
+
+//**********************INPUT PINS**************************************
 
 const int rightRed = 5; //right red button
 const int leftRed = 4; //left red button
@@ -15,11 +21,14 @@ const int yellowEnter = 8; //yellow enter button, I/O 2
 const int leftLimit = 7; //left limit switch. Green/White twisted pair.
 const int rightLimit = 6; //right limit switch. Blue/White twisted pair.
 
+//***********************OUTPUT PINS************************************
+
+const int pwmPin = 9;
 //const int Hallpin = 2;               // wired to Hall Effect sensor output
-//const int CWpin  = 10;                // wired to MD01B pin INa
-//const int CCWpin = 9;                // wired to MD01B pin INb
+//const int CWpin  = A1;                // wired to MD01B pin INa
+//const int CCWpin = A0;                // wired to MD01B pin INb
 
-
+//*************************TAP lib constructors*************************
 Tap green(greenMenu);
 Tap right_Rb(rightRed);
 Tap left_Rb(leftRed);
@@ -47,7 +56,11 @@ void setup() { //int yer inpins
   pinMode(yellowEnter, INPUT);
   pinMode(leftLimit, INPUT);
   pinMode(rightLimit, INPUT);
-  
+
+  pinMode(pwmPin, OUTPUT);
+  pinMode(CWpin, OUTPUT);
+  pinMode(CCWpin, OUTPUT);
+
   Serial.begin(9600);
   slcd.begin();
   slcd.backlight();

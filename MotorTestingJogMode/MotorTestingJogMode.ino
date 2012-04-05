@@ -76,19 +76,15 @@ void loop() {
 
 
   if (left_Rb.isHit()) {
-    slewMode_c(CWpin);
+    jogMode_c(CWpin);
   }
   else if (right_Rb.isHit()) {
-    slewMode_c(CCWpin);
+    jogMode_c(CCWpin);
   }
   else if (menuButton == HIGH) {
     hallInterCount = 0;
     tempHallCount = 0;
     slcd.clear();
-  }
-  else if (hallInterCount == targetSteps) {
-    stopMotor();
-    hallInterCount = 0;
   }
   slcd.setCursor(0,0);
   slcd.print(inputRight, DEC);
@@ -112,12 +108,12 @@ void stopMotor(){ //This is to stop the motor
   digitalWrite(CCWpin, LOW);
 }
 
-void slewMode_c(int direction) {
+void jogMode_c(int direction) {
 
-while (hallInterCount < targetSteps) {
+while (hallInterCount == 0) {
   digitalWrite(direction, HIGH);
 }
-if (hallInterCount == targetSteps) {
+if (hallInterCount == 1) {
   stopMotor();
   hallInterCount = 0;
   slcd.setCursor(8,0);
