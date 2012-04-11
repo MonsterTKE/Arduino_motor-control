@@ -37,8 +37,13 @@ unsigned int testVar = 0; //counter for jogmode
 
 int stepIncrements = 0;
 int stepMultiplier = 1;
-//*************************HALL EFFECT, ISR variables*********************
 
+//*************************JOG TIMERS*************************************
+int jDelay;                          // initial time between jogs
+int jogDelay = 500;                  // time between sucessive jogs
+int jogSlope = 12;
+
+//*************************HALL EFFECT, ISR variables*********************
 volatile unsigned int tempHallCount = 0;
 volatile unsigned int hallInterCount = 0;
 
@@ -108,9 +113,11 @@ void stopMotor(){ //This is to stop the motor
   digitalWrite(CCWpin, LOW);
 }
 
-void jogMode_c(int direction) {
+void jogMode_c(int direction, int button) {
 
-while (hallInterCount == 0) {
+boolean buttonPress = digitalRead(button);
+
+if (buttonpress) {
   digitalWrite(direction, HIGH);
 }
 if (hallInterCount == 1) {
@@ -119,4 +126,18 @@ if (hallInterCount == 1) {
   slcd.setCursor(8,0);
   slcd.print(targetSteps, DEC);
 }
+}
+
+int getJogDelay() {
+  // speed up the jog based on how long  a button has been held
+  if(hallInterCount <= 1) {              // init to half a second
+    jDelay = 500;
+  }
+  if(jDelay > 11) {            
+    jDelay = jDelay - jDelay/jogSlope;// nice logrythmic decrease
+  } 
+  else {
+    jDelay = 10;                     // set a 10 ms lower delay limit
+  }
+  return jDelay;
 }

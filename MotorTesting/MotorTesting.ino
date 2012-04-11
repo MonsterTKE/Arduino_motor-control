@@ -1,8 +1,9 @@
-#include <SerialLCD.h>
-#include <SoftwareSerial.h> //this is a must
-#include <Tap.h>
 
-SerialLCD slcd(11,12); //Initialize the lcd lib.
+#include <Tap.h>
+#include <Wire.h>
+#include <LiquidTWI.h>
+
+LiquidTWI lcd(0);
 
 //**********************INPUT PINS**************************************
 const int rightRed = 5; //right red button
@@ -57,9 +58,8 @@ void setup() { //int yer inpins
   pinMode(CWpin, OUTPUT);
   pinMode(CCWpin, OUTPUT);
 
-  Serial.begin(9600);
-  slcd.begin();
-  slcd.backlight();
+  lcd.begin(20,4);
+  lcd.setBacklight(HIGH);
 
   digitalWrite(Hallpin, HIGH);
   attachInterrupt(0, hallCount, FALLING);
@@ -84,22 +84,22 @@ void loop() {
   else if (menuButton == HIGH) {
     hallInterCount = 0;
     tempHallCount = 0;
-    slcd.clear();
+    lcd.clear();
   }
   else if (hallInterCount == targetSteps) {
     stopMotor();
     hallInterCount = 0;
   }
-  slcd.setCursor(0,0);
-  slcd.print(inputRight, DEC);
-  slcd.setCursor(2,0);
-  slcd.print(inputLeft, DEC);
-  slcd.setCursor(4,0);
-  slcd.print(hallInterCount, DEC);
-  slcd.setCursor(6,0);
-  slcd.print(tempHallCount, DEC);
-  slcd.setCursor(8,0);
-  slcd.print(targetSteps, DEC);
+  lcd.setCursor(0,0);
+  lcd.print(inputRight, DEC);
+  lcd.setCursor(2,0);
+  lcd.print(inputLeft, DEC);
+  lcd.setCursor(4,0);
+  lcd.print(hallInterCount, DEC);
+  lcd.setCursor(6,0);
+  lcd.print(tempHallCount, DEC);
+  lcd.setCursor(8,0);
+  lcd.print(targetSteps, DEC);
 }
 
 void hallCount() {
@@ -120,7 +120,7 @@ while (hallInterCount < targetSteps) {
 if (hallInterCount == targetSteps) {
   stopMotor();
   hallInterCount = 0;
-  slcd.setCursor(8,0);
-  slcd.print(targetSteps, DEC);
+  lcd.setCursor(8,0);
+  lcd.print(targetSteps, DEC);
 }
 }

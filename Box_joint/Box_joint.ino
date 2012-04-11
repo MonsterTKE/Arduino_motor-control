@@ -6,11 +6,11 @@ this is the advancing framework for lcd menus
  what is connected to what and what it is doing.
  */
 //*********************LIBRARY IMPORTS*********************************
-#include <SerialLCD.h>
-#include <SoftwareSerial.h> //this is a must
+#include <Wire.h>
+#include <LiquidTWI.h>
 #include <Tap.h>
 
-SerialLCD slcd(11,12); //Initialize the lcd lib.
+LiquidTWI lcd(0); //Initialize the lcd lib.
 
 //**********************INPUT PINS**************************************
 
@@ -24,9 +24,9 @@ const int rightLimit = 6; //right limit switch. Blue/White twisted pair.
 //***********************OUTPUT PINS************************************
 
 const int pwmPin = 9;
-//const int Hallpin = 2;               // wired to Hall Effect sensor output
-//const int CWpin  = A1;                // wired to MD01B pin INa
-//const int CCWpin = A0;                // wired to MD01B pin INb
+const int Hallpin = 2;               // wired to Hall Effect sensor output
+const int CWpin  = A1;                // wired to MD01B pin INa
+const int CCWpin = A0;                // wired to MD01B pin INb
 
 //*************************TAP lib constructors*************************
 Tap green(greenMenu);
@@ -61,9 +61,8 @@ void setup() { //int yer inpins
   pinMode(CWpin, OUTPUT);
   pinMode(CCWpin, OUTPUT);
 
-  Serial.begin(9600);
-  slcd.begin();
-  slcd.backlight();
+  lcd.begin(20,4);
+  lcd.setBacklight(HIGH);
 }
 
 void loop() { //high speed code goes here
@@ -132,20 +131,20 @@ void setupDefault() { //this is the default setup menu
     noClearBottom();
     refreshScreen = 0;
   }
-  slcd.setCursor(0, 0);
-  slcd.print(" steps ");
-  slcd.setCursor(7,0);
-  slcd.print(stepIncrements, DEC);
-  slcd.setCursor(8, 0);
-  slcd.print(" inches ");
-  slcd.setCursor(1, 1);
-  slcd.print(targetSteps, DEC); 
+  lcd.setCursor(0, 0);
+  lcd.print(" steps ");
+  lcd.setCursor(7,0);
+  lcd.print(stepIncrements, DEC);
+  lcd.setCursor(8, 0);
+  lcd.print(" inches ");
+  lcd.setCursor(1, 1);
+  lcd.print(targetSteps, DEC); 
   lcdPrintDouble(targetInches, 5, 9, 1);  
 }
 
 void jogMenuMode() { //This is the controller for jog mode
-  slcd.setCursor(0, 0);
-  slcd.print("Jog mode | steps");
+  lcd.setCursor(0, 0);
+  lcd.print("Jog mode | steps");
   jogMenuControl();
 }
 
@@ -153,12 +152,12 @@ void slewMenuMode() { //this is the slewing controller
   if (lcdRefreshOK()) {
     noClear;
   }
-  slcd.setCursor(0, 0);
-  slcd.print("Slew Mode        ");
-  slcd.setCursor(12, 1);
-  slcd.print(menuMode, DEC); 
-  slcd.setCursor(1, 1);
-  slcd.print(targetSteps, DEC);
+  lcd.setCursor(0, 0);
+  lcd.print("Slew Mode        ");
+  lcd.setCursor(12, 1);
+  lcd.print(menuMode, DEC); 
+  lcd.setCursor(1, 1);
+  lcd.print(targetSteps, DEC);
 }
 
 //*************************************** LCD HANDLERS **********************************
@@ -173,32 +172,32 @@ boolean lcdRefreshOK() { //Refresh the lcd screen, this is a better way, calls n
   return OK;
 }
 
-void noClear() { //prints blanks to the screen, looks way better that using slcd.clear().
-  slcd.setCursor(0,0);
-  slcd.print("                ");
-  slcd.setCursor(0,1);
-  slcd.print("                ");
+void noClear() { //prints blanks to the screen, looks way better that using lcd.clear().
+  lcd.setCursor(0,0);
+  lcd.print("                ");
+  lcd.setCursor(0,1);
+  lcd.print("                ");
 }
 
 void noClearBottom() { //does the same as noClear but only clears the bottom row.
-  slcd.setCursor(0,1);
-  slcd.print("                ");
+  lcd.setCursor(0,1);
+  lcd.print("                ");
 }
 
 void lcdPrintDouble( double val, byte precision, int row, int col){ // example: printDouble( 3.1415, 2, 0, 1); // prints 3.14 (two decimal places)
   // prints val on a ver 0012 text lcd with number of decimal places determine by precision
   // precision is a number from 0 to 6 indicating the desired decimial places
   // example: printDouble( 3.1415, 2); // prints 3.14 (two decimal places)
-  slcd.setCursor(row,col);
+  lcd.setCursor(row,col);
 
   if(val < 0.0){
-    slcd.print('-');
+    lcd.print('-');
     val = -val;
   }
 
-  slcd.print (val,DEC);  //prints the int part
+  lcd.print (val,DEC);  //prints the int part
   if( precision > 0) {
-    slcd.print("."); // print the decimal point
+    lcd.print("."); // print the decimal point
     unsigned long frac;
     unsigned long mult = 1;
     byte padding = precision -1;
@@ -213,8 +212,8 @@ void lcdPrintDouble( double val, byte precision, int row, int col){ // example: 
     while( frac1 /= 10 )
       padding--;
     while(  padding--)
-      slcd.print("0");
-    slcd.print(frac,DEC) ;
+      lcd.print("0");
+    lcd.print(frac,DEC) ;
   }
 }
 
@@ -247,14 +246,14 @@ void jogMenuControl() { //This is the action code for jog mode
 
   if (left_Rb.isHit()) {
     testVar++;
-    slcd.setCursor(8, 1);
-    slcd.print("<--");
+    lcd.setCursor(8, 1);
+    lcd.print("<--");
     refreshScreen = 1;
   }
   else if (right_Rb.isHit()) {
     testVar++;
-    slcd.setCursor(8, 1);
-    slcd.print("-->");
+    lcd.setCursor(8, 1);
+    lcd.print("-->");
     refreshScreen = 1;
   }
   else {
@@ -265,8 +264,8 @@ void jogMenuControl() { //This is the action code for jog mode
     refreshScreen = 0;
   }
 
-  slcd.setCursor(12, 1);
-  slcd.print(testVar, DEC);
-  slcd.setCursor(0, 1);
-  slcd.print(refreshScreen, DEC);
+  lcd.setCursor(12, 1);
+  lcd.print(testVar, DEC);
+  lcd.setCursor(0, 1);
+  lcd.print(refreshScreen, DEC);
 }
