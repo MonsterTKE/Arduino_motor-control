@@ -5,24 +5,34 @@ this is the advancing framework for lcd menus
  This removes alot of the wire clutter inside the box and makes it simpler to visualize 
  what is connected to what and what it is doing.
  */
+//*********************LIBRARY IMPORTS*********************************
+#include <Wire.h>
+#include <LiquidTWI.h>
+#include <Tap.h>
 
-#include <SerialLCD.h>
-#include <SoftwareSerial.h> //this is a must
+LiquidTWI lcd(0); //Initialize the lcd lib.
 
+//**********************INPUT PINS**************************************
 
-SerialLCD slcd(11,12); //Initialize the lcd lib.
+const int rightRed = 5; //right red button
+const int leftRed = 4; //left red button
+const int greenMenu = 3; //green menu button
+const int yellowEnter = 8; //yellow enter button, I/O 2
+const int leftLimit = 7; //left limit switch. Green/White twisted pair.
+const int rightLimit = 6; //right limit switch. Blue/White twisted pair.
 
-const int inPin1 = 5; //right red button
-const int inPin2 = 4; //left red button
-const int inPin3 = 3; //green menu button
-const int inPin4 = 8; //yellow enter button, I/O 2
-const int inPin5 = 7; //left limit switch. Green/White twisted pair.
-const int inPin6 = 6; //right limit switch. Blue/White twisted pair.
+//***********************OUTPUT PINS************************************
 
-//const int Hallpin = 2;               // wired to Hall Effect sensor output
-//const int CWpin  = 10;                // wired to MD01B pin INa
-//const int CCWpin = 9;                // wired to MD01B pin INb
+const int pwmPin = 9;
+const int Hallpin = 2;               // wired to Hall Effect sensor output
+const int CWpin  = A1;                // wired to MD01B pin INa
+const int CCWpin = A0;                // wired to MD01B pin INb
 
+//*************************TAP lib constructors*************************
+Tap green(greenMenu);
+Tap right_Rb(rightRed);
+Tap left_Rb(leftRed);
+Tap yellow(yellowEnter);
 
 int loopCounter = 0; //Loop counter to refresh screen.
 unsigned long lcdUpdate;
@@ -40,16 +50,19 @@ int stepMultiplier = 1;
 
 void setup() { //int yer inpins
 
-  pinMode(inPin1, INPUT); 
-  pinMode(inPin2, INPUT);
-  pinMode(inPin3, INPUT);
-  pinMode(inPin4, INPUT);
-  pinMode(inPin5, INPUT);
-  pinMode(inPin6, INPUT);
-  
-  Serial.begin(9600);
-  slcd.begin();
-  slcd.backlight();
+  pinMode(rightRed, INPUT); 
+  pinMode(leftRed, INPUT);
+  pinMode(greenMenu, INPUT);
+  pinMode(yellowEnter, INPUT);
+  pinMode(leftLimit, INPUT);
+  pinMode(rightLimit, INPUT);
+
+  pinMode(pwmPin, OUTPUT);
+  pinMode(CWpin, OUTPUT);
+  pinMode(CCWpin, OUTPUT);
+
+  lcd.begin(20,4);
+  lcd.setBacklight(HIGH);
 }
 
 void loop() { //high speed code goes here
@@ -57,12 +70,8 @@ void loop() { //high speed code goes here
 }
 
 void mainMenu() { //this is the overall menu controller
-  int inputLeft = digitalRead(inPin2);
-  int inputRight = digitalRead(inPin1);
-  int menuButton = digitalRead(inPin3);
-  int enterButton = digitalRead(inPin4);
 
-  if (menuButton == HIGH){
+  if (green.isHit()){
     noClear();
     menuMode++;
     delay(50);
@@ -87,14 +96,13 @@ void mainMenu() { //this is the overall menu controller
 }
 
 void setupDefault() { //this is the default setup menu
-  int inputRight = digitalRead(inPin1);
-  int inputLeft = digitalRead(inPin2);
-  int menuButton = digitalRead(inPin3);
-  int enterButton = digitalRead(inPin4);
+
   double targetInches = targetSteps * .00390625;
 
-  if (enterButton == HIGH) {
+  if (yellow.isHit()) {
     stepIncrements++;
+    lcd.setCursor(16,0);
+    lcd.print("    ");
     //noClear();
   }
   if (stepIncrements == 3) {
@@ -112,81 +120,65 @@ void setupDefault() { //this is the default setup menu
     break;
   }
 
-  if (inputRight == HIGH) {
+  if (right_Rb.isHit()) {
     targetSteps = targetSteps + stepMultiplier;
     refreshScreen =1;
   }
-  else if (inputLeft == HIGH) {
+  else if (left_Rb.isHit()) {
     targetSteps = targetSteps - stepMultiplier;
     refreshScreen = 1;
   }
 
-  if (refreshScreen == 1 && !inputLeft && !inputRight) {
+  if (refreshScreen == 1 && !left_Rb.isHit() && !right_Rb.isHit()) {
     noClearBottom();
     refreshScreen = 0;
   }
-  slcd.setCursor(0, 0);
-  slcd.print(" steps ");
-  slcd.setCursor(7,0);
-  slcd.print(stepIncrements, DEC);
-  slcd.setCursor(8, 0);
-  slcd.print(" inches ");
-  slcd.setCursor(1, 1);
-  slcd.print(targetSteps, DEC); 
-  lcdPrintDouble(targetInches, 5, 9, 1);  
+  lcd.setCursor(0,0);
+  lcd.print("Setup");
+
+    if (stepIncrements == 0){
+    lcd.setCursor(7,0);
+    lcd.print("Incr. x 1");
+    }
+      if (stepIncrements == 1){
+      lcd.setCursor(7,0);
+      lcd.print("Incr. x 10");
+      }
+        if (stepIncrements == 2){
+        lcd.setCursor(7,0);
+        lcd.print("Incr. x 100");
+        }
+
+  lcd.setCursor(0, 2);
+  lcd.print("Steps ");
+
+  lcd.setCursor(8, 2);
+  lcd.print("Inches ");
+  lcd.setCursor(1, 3);
+  lcd.print(targetSteps, DEC); 
+  lcd.setCursor(9,3);
+  lcd.print(targetInches,4);  
 }
 
 void jogMenuMode() { //This is the controller for jog mode
-  slcd.setCursor(0, 0);
-  slcd.print("Jog mode | steps");
+  lcd.setCursor(0, 0);
+  lcd.print("Jog mode | steps");
   jogMenuControl();
-}
-
-void jogMenuControl() { //This is the action code for jog mode
-  int inputRight = digitalRead(inPin1);
-  int inputLeft = digitalRead(inPin2);
-
-  if (inputLeft == HIGH) {
-    testVar++;
-    slcd.setCursor(8, 1);
-    slcd.print("<--");
-    refreshScreen = 1;
-  }
-  else if (inputRight == HIGH) {
-    testVar++;
-    slcd.setCursor(8, 1);
-    slcd.print("-->");
-    refreshScreen = 1;
-  }
-  else {
-    testVar = 0;
-  }
-  if (refreshScreen == 1 && !inputLeft && !inputRight) {
-    noClearBottom();
-    refreshScreen = 0;
-  }
-
-  slcd.setCursor(12, 1);
-  slcd.print(testVar, DEC);
-  slcd.setCursor(0, 1);
-  slcd.print(refreshScreen, DEC);
 }
 
 void slewMenuMode() { //this is the slewing controller
   if (lcdRefreshOK()) {
     noClear;
   }
-  slcd.setCursor(0, 0);
-  slcd.print("Slew Mode        ");
-  slcd.setCursor(12, 1);
-  slcd.print(menuMode, DEC); 
-  slcd.setCursor(1, 1);
-  slcd.print(targetSteps, DEC);
+  lcd.setCursor(0, 2);
+  lcd.print("Slew Mode        ");
+  lcd.setCursor(12, 1);
+  lcd.print(menuMode, DEC); 
+  lcd.setCursor(1, 1);
+  lcd.print(targetSteps, DEC);
 }
 
-void slewMenuControl() { //this is the sction code for slew mode.
-
-}
+//*************************************** LCD HANDLERS **********************************
 
 boolean lcdRefreshOK() { //Refresh the lcd screen, this is a better way, calls noClear()
   boolean OK = false;
@@ -198,32 +190,32 @@ boolean lcdRefreshOK() { //Refresh the lcd screen, this is a better way, calls n
   return OK;
 }
 
-void noClear() { //prints blanks to the screen, looks way better that using slcd.clear().
-  slcd.setCursor(0,0);
-  slcd.print("                ");
-  slcd.setCursor(0,1);
-  slcd.print("                ");
+void noClear() { //prints blanks to the screen, looks way better that using lcd.clear().
+  lcd.setCursor(0,0);
+  lcd.print("                ");
+  lcd.setCursor(0,1);
+  lcd.print("                ");
 }
 
 void noClearBottom() { //does the same as noClear but only clears the bottom row.
-  slcd.setCursor(0,1);
-  slcd.print("                ");
+  lcd.setCursor(0,1);
+  lcd.print("                ");
 }
 
 void lcdPrintDouble( double val, byte precision, int row, int col){ // example: printDouble( 3.1415, 2, 0, 1); // prints 3.14 (two decimal places)
   // prints val on a ver 0012 text lcd with number of decimal places determine by precision
   // precision is a number from 0 to 6 indicating the desired decimial places
   // example: printDouble( 3.1415, 2); // prints 3.14 (two decimal places)
-  slcd.setCursor(row,col);
+  lcd.setCursor(row,col);
 
   if(val < 0.0){
-    slcd.print('-');
+    lcd.print('-');
     val = -val;
   }
 
-  slcd.print (val,DEC);  //prints the int part
+  lcd.print (val,DEC);  //prints the int part
   if( precision > 0) {
-    slcd.print("."); // print the decimal point
+    lcd.print("."); // print the decimal point
     unsigned long frac;
     unsigned long mult = 1;
     byte padding = precision -1;
@@ -238,15 +230,60 @@ void lcdPrintDouble( double val, byte precision, int row, int col){ // example: 
     while( frac1 /= 10 )
       padding--;
     while(  padding--)
-      slcd.print("0");
-    slcd.print(frac,DEC) ;
+      lcd.print("0");
+    lcd.print(frac,DEC) ;
   }
 }
 
-void rightLimitHandler() {
+
+//***************** MOTOR HANDLING *************************
+
+void rightLimitHandler() { //this controld the behavior of the system when the RIGHT limit switch is HIGH.
   // placeholder
 }
 
-void leftlimit() {
+void leftlimit() { //this controld the behavior of the system when the LEFT limit switch is HIGH.
   //placeholder
+}
+
+/*
+void stopMotor(){ //This is to stop the motor
+  digitalWrite(CWpin, LOW); 
+  digitalWrite(CCWpin, LOW);
+}
+*/
+
+void slewMenuControl() { //this is the action code for slew mode.
+
+}
+
+void jogMenuControl() { //This is the action code for jog mode
+
+  boolean rightRed_b = digitalRead(rightRed);
+  boolean leftRed_b = digitalRead(leftRed);
+
+  if (left_Rb.isHit()) {
+    testVar++;
+    lcd.setCursor(8, 1);
+    lcd.print("<--");
+    refreshScreen = 1;
+  }
+  else if (right_Rb.isHit()) {
+    testVar++;
+    lcd.setCursor(8, 1);
+    lcd.print("-->");
+    refreshScreen = 1;
+  }
+  else {
+    testVar = 0;
+  }
+  if (refreshScreen == 1 && !rightRed_b && !leftRed_b) {
+    noClearBottom();
+    refreshScreen = 0;
+  }
+
+  lcd.setCursor(12, 1);
+  lcd.print(testVar, DEC);
+  lcd.setCursor(0, 1);
+  lcd.print(refreshScreen, DEC);
 }
