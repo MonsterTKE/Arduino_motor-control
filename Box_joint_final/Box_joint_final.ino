@@ -72,10 +72,9 @@ void loop() { //high speed code goes here
 void mainMenu() { //this is the overall menu controller
 
   if (green.isHit()){
-    noClear();
+    lcd.clear();
     menuMode++;
-    delay(50);
-
+    
   }
   if (menuMode == 3) {
     menuMode = 0; 
@@ -130,7 +129,10 @@ void setupDefault() { //this is the default setup menu
   }
 
   if (refreshScreen == 1 && !left_Rb.isHit() && !right_Rb.isHit()) {
-    noClearBottom();
+    lcd.setCursor(6,3);
+    lcd.print("         ");
+    lcd.setCursor(6, 2);
+    lcd.print("      ");
     refreshScreen = 0;
   }
   lcd.setCursor(0,0);
@@ -150,13 +152,13 @@ void setupDefault() { //this is the default setup menu
         }
 
   lcd.setCursor(0, 2);
-  lcd.print("Steps ");
+  lcd.print("Step:");
+  lcd.setCursor(6, 2);
+  lcd.print(targetSteps, DEC);
 
-  lcd.setCursor(8, 2);
-  lcd.print("Inches ");
-  lcd.setCursor(1, 3);
-  lcd.print(targetSteps, DEC); 
-  lcd.setCursor(9,3);
+  lcd.setCursor(0, 3);
+  lcd.print("Inch:"); 
+  lcd.setCursor(6,3);
   lcd.print(targetInches,4);  
 }
 
