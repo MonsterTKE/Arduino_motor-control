@@ -164,7 +164,7 @@ void setupDefault() { //this is the default setup menu
 
 void jogMenuMode() { //This is the controller for jog mode
   lcd.setCursor(0, 0);
-  lcd.print("Jog mode | steps");
+  lcd.print("Jog mode");
   jogMenuControl();
 }
 
@@ -192,16 +192,12 @@ boolean lcdRefreshOK() { //Refresh the lcd screen, this is a better way, calls n
   return OK;
 }
 
-void noClear() { //prints blanks to the screen, looks way better that using lcd.clear().
-  lcd.setCursor(0,0);
-  lcd.print("                ");
-  lcd.setCursor(0,1);
-  lcd.print("                ");
-}
+void noClear(int row, int col, char spaces[]) { //prints blanks to the screen, looks way better that using lcd.clear().
+  lcd.setCursor(row,col);
+  lcd.print(spaces);
 
-void noClearBottom() { //does the same as noClear but only clears the bottom row.
-  lcd.setCursor(0,1);
-  lcd.print("                ");
+
+
 }
 
 void lcdPrintDouble( double val, byte precision, int row, int col){ // example: printDouble( 3.1415, 2, 0, 1); // prints 3.14 (two decimal places)
@@ -266,26 +262,26 @@ void jogMenuControl() { //This is the action code for jog mode
 
   if (left_Rb.isHit()) {
     testVar++;
-    lcd.setCursor(8, 1);
+    lcd.setCursor(8, 2);
     lcd.print("<--");
     refreshScreen = 1;
   }
   else if (right_Rb.isHit()) {
     testVar++;
-    lcd.setCursor(8, 1);
+    lcd.setCursor(8, 2);
     lcd.print("-->");
     refreshScreen = 1;
   }
   else {
     testVar = 0;
   }
-  if (refreshScreen == 1 && !rightRed_b && !leftRed_b) {
-    noClearBottom();
+  if (refreshScreen == 1 && !rightRed_b && !leftRed_b) { //Want to put a conditional here to display the arrow when the motor is running.
+    noClear(8,2,"   ");
     refreshScreen = 0;
   }
 
-  lcd.setCursor(12, 1);
+  lcd.setCursor(12, 2);
   lcd.print(testVar, DEC);
-  lcd.setCursor(0, 1);
+  lcd.setCursor(0, 2);
   lcd.print(refreshScreen, DEC);
 }
