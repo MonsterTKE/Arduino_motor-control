@@ -51,7 +51,8 @@ volatile boolean tripCount;
 
 //************************Performance timing *****************************
 
-unsigned long currentMicros;
+
+unsigned long time = 0;
 
 void setup() { //int yer inpins
 
@@ -77,108 +78,71 @@ void setup() { //int yer inpins
   lcd.begin(20,4);
   lcd.setBacklight(HIGH);
 
-  analogWrite(pwmPin, 255);
+  analogWrite(pwmPin, 100);
 }
 
 void loop() {
+
+   
+
   int inputLeft = digitalRead(leftRed);
   int inputRight = digitalRead(rightRed);
   int menuButton = digitalRead(greenMenu);
 
-  currentMicros = micros();
 
-  if (right_Rb.isHit()) {
-    stepOne();
+  if (inputRight && !tripped) {
+    while (true) {
+    digitalWrite(CCWpin, HIGH);
+    if (tripped) {
+      digitalWrite(CCWpin, LOW);
+      tripped = false;
+      break;
+    }
+  }
+  delay(100);
+  tripped = false;
   }
   if (left_Rb.isHit()) {
     digitalWrite(CCWpin, LOW);
   }
+  if (green.isHit()) {
+    hallInterCount = 0;
+    loopCounter = 0;
+  }
+  if (yellow.isHit()) {
+    lcd.clear();
+  }
+  if (tripped) {
+    tripped = false;
+    digitalWrite(CCWpin, LOW);
+  }
  lcd.setCursor(0,0);
- lcd.print(inputRight, DEC);
- lcd.setCursor(2,0);
- lcd.print(inputLeft, DEC);
- lcd.setCursor(4,0);
- lcd.print(hallInterCount, DEC);
- lcd.setCursor(6,1);
- lcd.print(tempHallCount, DEC);
- lcd.setCursor(8,2);
- lcd.print(targetSteps, DEC);
- lcd.setCursor(8,3);
- lcd.print(tripped, DEC);
+ lcd.print("Steps passed:");
+ lcd.setCursor(14,0);
+ lcd.print(hallInterCount);
+
+ lcd.setCursor(0,1);
+ lcd.print("Temp passed:");
+ lcd.setCursor(14,1);
+ lcd.print(tempHallCount);
+
+ lcd.setCursor(0,2);
+ lcd.print("isr timing:");
+ lcd.setCursor(14,2);
+ lcd.print(time);
+
+  lcd.setCursor(0,3);
+ lcd.print("Loop count:");
+ lcd.setCursor(14,3);
+ lcd.print(loopCounter);
+
+ loopCounter++;
 }
 
 void hallCount() {
+    time = micros();
   hallInterCount = hallInterCount + 1;
-  tempHallCount = hallInterCount;
   tripped = true;
-  if (hallInterCount >= targetSteps) {
-    tripCount = true;
-    hallInterCount = 0;
-  }
+   time = micros() - time;
 }
 
-void stopMotor(){ //This is to stop the motor
-  digitalWrite(CWpin, LOW); 
-  digitalWrite(CCWpin, LOW);
-}
-
-void jogMode_c(int direction, int button) {
-
-boolean buttonPress = digitalRead(button);
-
-if (buttonPress) {
-  digitalWrite(direction, HIGH);
-}
-else {
-  stopMotor();
-}
-}
-
-int getJogDelay() {
-  // speed up the jog based on how long  a button has been held
-  if(hallInterCount <= 1) {              // init to half a second
-    jDelay = 500;
-  }
-  if(jDelay > 11) {            
-    jDelay = jDelay - jDelay/jogSlope;// nice logrythmic decrease
-  } 
-  else {
-    jDelay = 10;                     // set a 10 ms lower delay limit
-  }
-  return jDelay;
-}
-
-void stepOne() {
-
-unsigned long currentTime = currentMicros - micros()/1000;
-
-  if (!tripCount) {
-    if (targetSteps - hallInterCount < 10){
-    analogWrite(pwmPin, 60);
-    }
-    if (targetSteps - hallInterCount > 10){
-    analogWrite(pwmPin, 255);
-    }
-      digitalWrite(CWpin, HIGH);
-      digitalWrite(CCWpin, LOW);
-    } 
-    if (tripCount) {
-    digitalWrite(CWpin, LOW);
-    tripCount = false;
-    }
-
-    lcd.setCursor(8,4);
-    lcd.print(currentTime);
-
-}
-
-int returnSteps() {
-      uint8_t oldSREG = SREG;          // save the interrupt register
-    cli();                           // stop interrupts
-    tmpTripped = true;               // records that a step was passed
-    tmppressCount = pressCount;      // # steps since button was pressed
-    tmpcountReached = countReached;  // flag that step count is done
-    Tripped = false;                 // reset until next step tripped
-    countReached = false;            // reset until next step tripped
-    SREG = oldSREG;  
-}
