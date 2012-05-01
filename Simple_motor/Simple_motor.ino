@@ -24,7 +24,7 @@ Tap right_Rb(rightRed);
 Tap left_Rb(leftRed);
 Tap yellow(yellowEnter);
 
-int loopCounter = 0; //Loop counter to refresh screen.
+unsigned long loopCounter = 0; //Loop counter to refresh screen.
 unsigned long lcdUpdate;
 unsigned long lastLcdUpdate;
 int refreshScreen = 0; //boolean counter to clear screen.
@@ -41,7 +41,7 @@ int stepMultiplier = 1;
 //*************************JOG TIMERS*************************************
 int jDelay;                          // initial time between jogs
 int jogDelay = 500;                  // time between sucessive jogs
-int jogSlope = 12;
+int jogSlope = 4;
 
 //*************************HALL EFFECT, ISR variables*********************
 volatile unsigned int tempHallCount = 0;
@@ -50,9 +50,10 @@ volatile boolean tripped;
 volatile boolean tripCount;
 
 //************************Performance timing *****************************
-
-
 unsigned long time = 0;
+
+//************************PWM Stuff***************************************
+int pwmSlope = 255;
 
 void setup() { //int yer inpins
 
@@ -83,7 +84,7 @@ void setup() { //int yer inpins
 
 void loop() {
 
-   
+
 
   int inputLeft = digitalRead(leftRed);
   int inputRight = digitalRead(rightRed);
@@ -91,19 +92,11 @@ void loop() {
 
 
   if (inputRight && !tripped) {
-    while (true) {
-    digitalWrite(CCWpin, HIGH);
-    if (tripped) {
-      digitalWrite(CCWpin, LOW);
-      tripped = false;
-      break;
-    }
+    jogMode_run(CCWpin, rightRed);
   }
-  delay(100);
-  tripped = false;
-  }
-  if (left_Rb.isHit()) {
-    digitalWrite(CCWpin, LOW);
+
+  if (inputLeft && !tripped) {
+    jogMode_run(CWpin, leftRed);
   }
   if (green.isHit()) {
     hallInterCount = 0;
@@ -116,33 +109,92 @@ void loop() {
     tripped = false;
     digitalWrite(CCWpin, LOW);
   }
- lcd.setCursor(0,0);
- lcd.print("Steps passed:");
- lcd.setCursor(14,0);
- lcd.print(hallInterCount);
 
- lcd.setCursor(0,1);
- lcd.print("Temp passed:");
- lcd.setCursor(14,1);
- lcd.print(tempHallCount);
+  lcd.setCursor(0,0);
+  lcd.print("Steps passed:");
+  lcd.setCursor(14,0);
+  lcd.print(hallInterCount);
 
- lcd.setCursor(0,2);
- lcd.print("isr timing:");
- lcd.setCursor(14,2);
- lcd.print(time);
+  lcd.setCursor(0,1);
+  lcd.print("Temp passed:");
+  lcd.setCursor(14,1);
+  lcd.print(tempHallCount);
+
+  lcd.setCursor(0,2);
+  lcd.print("delay");
+  lcd.setCursor(14,2);
+  lcd.print(jDelay);
 
   lcd.setCursor(0,3);
- lcd.print("Loop count:");
- lcd.setCursor(14,3);
- lcd.print(loopCounter);
-
- loopCounter++;
+  lcd.print("loops:");
+  lcd.setCursor(14,3);
+  lcd.print(loopCounter);
 }
 
 void hallCount() {
-    time = micros();
+  time = micros();
   hallInterCount = hallInterCount + 1;
   tripped = true;
-   time = micros() - time;
+  time = micros() - time;
 }
 
+int getJogDelay() {
+  // speed up the jog based on how long  a button has been held
+  if(hallInterCount <= 1) {              // init to half a second
+    jDelay = 500;
+  }
+  if(jDelay > 11) {            
+    jDelay = jDelay - jDelay/jogSlope;// nice logrythmic decrease
+  } 
+  else {
+    jDelay = 10;                     // set a 10 ms lower delay limit
+  }
+  return jDelay;
+}
+
+int pwmRamp() {
+  if (hallInterCount <=25) {
+    pwmSlope = 100;
+  }
+  if (hallInterCount <= 25) {
+    pwmSlope++;
+  }
+  return pwmSlope;
+}
+
+void jogMode_run(int direction, int button) {
+  int inputLeft = digitalRead(leftRed);
+  int inputRight = digitalRead(rightRed);
+
+  int read = digitalRead(button);
+
+  while (true) {
+    digitalWrite(direction, HIGH);
+    read = digitalRead(button);
+    loopCounter++;
+    if (!read) {
+      digitalWrite(direction, LOW);
+      jDelay = 500;
+      hallInterCount = 0;
+      break;
+    }
+    if (tripped && hallInterCount <= 16) {
+      digitalWrite(direction, LOW);
+      tripped = false;
+      break;
+    }
+    if (hallInterCount >= 17 && !read) {
+      tripped = false;
+      jDelay = 500;
+      hallInterCount = 0;
+      break;
+    }
+  }
+
+  read = digitalRead(button);
+
+  lcd.clear();
+  getJogDelay();
+  delay(jDelay);
+  tripped = false;
+}
