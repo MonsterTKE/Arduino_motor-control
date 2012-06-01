@@ -134,19 +134,7 @@ else {
 }
 }
 
-int getJogDelay() {
-  // speed up the jog based on how long  a button has been held
-  if(hallInterCount <= 1) {              // init to half a second
-    jDelay = 500;
-  }
-  if(jDelay > 11) {            
-    jDelay = jDelay - jDelay/jogSlope;// nice logrythmic decrease
-  } 
-  else {
-    jDelay = 10;                     // set a 10 ms lower delay limit
-  }
-  return jDelay;
-}
+ 
 
 void stepOne() {
 

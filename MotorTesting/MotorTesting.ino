@@ -43,6 +43,7 @@ int stepMultiplier = 1;
 volatile unsigned int tempHallCount = 0;
 volatile unsigned int hallInterCount = 0;
 
+
 void setup() { //int yer inpins
 
   pinMode(rightRed, INPUT); 
